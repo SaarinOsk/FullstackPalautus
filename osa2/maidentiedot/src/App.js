@@ -56,7 +56,7 @@ const App = () => {
   const [currentLatLong, setLatLong] = useState([0.0, 0.0])
   const [weatherData, setWeatherData] = useState({})
 
-  const api_key = '710bec8a8d60106dbf45caa4ffc3e5ee'
+  const api_key = process.env.REACT_APP_API_KEY
 
   useEffect(() => {
     axios

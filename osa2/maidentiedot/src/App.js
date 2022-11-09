@@ -9,16 +9,10 @@ const Input = ({text, handleChange, value}) => {
   )
 }
 
-const Countries = ({countries, setFilter}) => {
+const Countries = ({countries, setFilter, weatherData}) => {
   if (countries.length === 1) {
     const c = countries[0]
-    console.log(c)
-    
-
-    const latlng = c.capitalInfo.latlng
-
-    
-
+    console.log(weatherData)
     return (
       <div>
         <h2>{c.name.common}</h2>
@@ -32,8 +26,12 @@ const Countries = ({countries, setFilter}) => {
         </ul>
         
         <img src={c.flags.png} />
+
+        <h2>Weather in {c.capital}</h2>
+        <p>temperature {weatherData.main.temp} Celsius</p>
+        <img  src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`} />
+        <p>wind {weatherData.wind.speed}</p>
       </div>
-      
     )
   }
 
@@ -55,29 +53,26 @@ const Countries = ({countries, setFilter}) => {
 const App = () => {
   const [countries, setCountries] = useState([])
   const [newFilter, setNewFilter] = useState('')
+  const [currentLatLong, setLatLong] = useState([0.0, 0.0])
+  const [weatherData, setWeatherData] = useState({})
 
-  const api_key = ''
-  console.log(api_key)
+  const api_key = '710bec8a8d60106dbf45caa4ffc3e5ee'
+
   useEffect(() => {
     axios
       .get('https://restcountries.com/v3.1/all')
       .then(response => setCountries(response.data))  
   }, [])
   
-
-  /*useEffect(() => {
+  useEffect(() => {
     axios
-      .get(`https://api.openweathermap.org/data/2.5/weather?lat=44.34&lon=10.99&appid={${api_key}}`)
-      .then(response => console.log(response.data))  
-  })
-  */
-
+      .get(`https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${currentLatLong[0]}&lon=${currentLatLong[1]}&appid=${api_key}`)
+      .then(response => setWeatherData(response.data))  
+  }, [currentLatLong])
 
   const handleFilter = (event) => {
     setNewFilter(event.target.value)
   }
-  
-
 
   const countriesToShow = () => {
     const realFilter = newFilter.toLowerCase()
@@ -89,11 +84,12 @@ const App = () => {
     else {return []}
   }
 
+  useEffect(() => {if(countriesToShow().length === 1) {setLatLong(countriesToShow()[0].capitalInfo.latlng)}})
 
   return (
     <div>
       <Input text={"find countries"} value={newFilter} handleChange={handleFilter} />
-      <Countries countries={countriesToShow()} setFilter={setNewFilter} />
+      <Countries countries={countriesToShow()} setFilter={setNewFilter} weatherData={weatherData} />
     </div>
   )
 }

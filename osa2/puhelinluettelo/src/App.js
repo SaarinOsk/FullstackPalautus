@@ -57,7 +57,6 @@ const Notification = ({text, color}) => {
   if (text === null) {
     return null
   }
-  console.log(color)
 
   const notifStyle = {
     color: color,
@@ -116,7 +115,7 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.every(n => n.name != newName)) {
+    if (persons.every(n => n.name !== newName)) {
       const personObject = {name: newName, number: newNumber}
       personService
         .create(personObject)
@@ -124,13 +123,24 @@ const App = () => {
             setPersons(persons.concat(createdPerson))
             setNewName('')
             setNewNumber('')
+            setMessage(
+              `Added ${personObject.name}`
+            )
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
           })
-      setMessage(
-        `Added ${personObject.name}`
-      )
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+          .catch(error => {
+            console.log(error.response.data)
+            setColor('red')
+            setMessage(
+              `${error.response.data.error}`
+            )
+            setTimeout(() => {
+              setMessage(null)
+              setColor('green')
+            }, 5000)
+          })
     }
     
     else {

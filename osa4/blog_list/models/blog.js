@@ -11,6 +11,7 @@ const blogSchema = mongoose.Schema({
     }
 })
 
+
 blogSchema.set('toJSON', {
     transform: (document, retObj) => {
         retObj.id = retObj._id.toString(),

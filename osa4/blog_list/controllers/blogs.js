@@ -1,6 +1,8 @@
 const blogsRouter = require('express').Router()
+const req = require('express/lib/request')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response) => {
   //User.deleteMany({})
@@ -24,7 +26,12 @@ blogsRouter.post('/', async (request, response) => {
         body.likes = 0
       }
 
-      const user = await User.findById(body.userId)
+      const usr = request.user
+      if (!usr) {
+        return response.status(401).json({error: 'invalid token'})
+      }
+
+      const user = await User.findById(usr.id)
 
       const blog = new Blog({
         title: body.title,
@@ -44,10 +51,20 @@ blogsRouter.post('/', async (request, response) => {
 
 blogsRouter.delete('/:id', async (request, response) => {
   try {
+    const user = request.user
+    if (!user) {
+      return response.status(401).json({error: 'invalid token'})
+    }
     const id = request.params.id
+    const blog = await Blog.findById(id)
+
+    if ( blog.user.toString() != user.id.toString() ) {
+      return response.status(401).json({error: 'unauthorized to delete' })
+    }
     const res = await Blog.findByIdAndRemove(id)
     response.status(204).end()
   } catch (exception) {
+    console.log(exception)
     response.status(400).json({error: "bad id"})
   }
     
